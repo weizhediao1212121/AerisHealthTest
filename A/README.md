@@ -19,16 +19,11 @@ x n
 
 ##  如何运行测试
 
-使用 unittest
-在项目根目录运行：
 
-python A/mystic_waves_test.py
-
-使用 pytest
 如果已经安装 pytest：
-
+```bash
 python -m pytest A/mystic_waves_test.py
-
+```
 
 # Task A: Mystic Waves
 
@@ -50,16 +45,6 @@ x n
 ```
 
 ## How to Run Tests
-
-### Using unittest
-
-From the project root:
-
-```bash
-python A/mystic_waves_test.py
-```
-
-### Using pytest
 
 If pytest is installed:
 
