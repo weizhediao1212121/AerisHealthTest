@@ -1,7 +1,6 @@
 def mystic_waves(x, n):
     return x if n % 2 == 1 else 0
 
-
 if __name__ == "__main__":
     t = int(input())
 

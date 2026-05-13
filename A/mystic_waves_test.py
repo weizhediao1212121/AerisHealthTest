@@ -1,6 +1,5 @@
 import subprocess
 import sys
-import unittest
 from mystic_waves import mystic_waves
 
 def test_mystic_waves_even_n():
@@ -19,7 +18,7 @@ def test_program_input_output():
 4 7
 """
     result = subprocess.run(
-        [sys.executable, "mystic_waves.py"],
+        [sys.executable, "A/mystic_waves.py"],
         input=input_data,
         text=True,
         capture_output=True,

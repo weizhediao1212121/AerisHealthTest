@@ -25,6 +25,13 @@ x n
 python -m pytest A/mystic_waves_test.py
 ```
 
+否则你可能需要：
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install pytest
+```
+
 # Task A: Mystic Waves
 
 This solution computes the total energy after `n` waves alternating between `x` and `-x`.
@@ -50,4 +57,11 @@ If pytest is installed:
 
 ```bash
 python -m pytest A/mystic_waves_test.py
+```
+
+otherwise you may want to do this:
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install pytest
 ```
