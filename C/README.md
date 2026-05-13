@@ -4,7 +4,8 @@ This section answers the Xero Accounting API scenario questions.
 
 ## C1. How would you prove that our Xero API connection is working before checking invoices?
 
-1. Firstly I need to prove the OAuth connection and tenant selection are working.
+1. Firstly I will call `/connections` to prove the OAuth token works and to get the tenant ID.
+
 
 Call:
 
@@ -16,10 +17,7 @@ Accept: application/json
 
 Expected result:
 
-- HTTP `200`.
-- Response contains at least one connected tenant.
-- The tenant has a `tenantId`.
-- The tenant type is normally `ORGANISATION` for the Accounting API.
+- If it returns 200 and gives a tenantId, OAuth works.
 
 2. After that, save or select the correct `tenantId`. This value is required in the `xero-tenant-id` header for Accounting API calls.
 
@@ -27,9 +25,7 @@ As an extra check, I could call a simple Accounting API endpoint such as organis
 
 ## C2. If `/connections` works but `GET /Invoices` fails, what would you check?
 
-If `/connections` works, the access token is probably valid. I would then check the Accounting API request details:
-
-- The request uses the correct Accounting API URL:
+If `/connections` works, the access token is probably valid. I will then check the Accounting API request details:
 
 ```http
 GET https://api.xero.com/api.xro/2.0/Invoices
@@ -47,28 +43,18 @@ Accept: application/json
 - The connected Xero user has permission to view invoices in that organisation.
 - The tenant ID belongs to the organisation being queried.
 - The error response body is checked, not only the status code.
-- If the status is `401`, refresh the token or re-authorise.
-- If the status is `403`, check scopes and user permissions.
-- If the status is `404`, check the URL and tenant.
-- If the status is `429`, handle rate limiting.
+- `401`: refresh the token or re-authorise.
+- `403`: check scopes and user permissions.
+- `404`: check the URL and tenant.
+- `429`: handle rate limiting.
 
 ## C3. What endpoint would you call to check invoices?
 
-Call:
+use invoice ID:
 
 ```http
-GET https://api.xero.com/api.xro/2.0/Invoices
-Authorization: Bearer <access_token>
-xero-tenant-id: <tenantId>
-Accept: application/json
+GET https://api.xero.com/api.xro/2.0/Invoices/{InvoiceID}
 ```
-
-Useful query or header options include:
-
-- `page=1` for pagination.
-- `Statuses=AUTHORISED` or another status filter.
-- `If-Modified-Since` to fetch only invoices changed after a known time.
-
 Example:
 
 ```http
@@ -89,7 +75,13 @@ xero-tenant-id: <tenantId>
 Accept: application/json
 ```
 
-If I only have an invoice number, I would filter the invoice list:
+Or if you only know invoice number, filter:
+
+```http
+GET .../Invoices?InvoiceNumbers=INV-001
+```
+
+FUll: 
 
 ```http
 GET https://api.xero.com/api.xro/2.0/Invoices?InvoiceNumbers=INV-001
@@ -98,13 +90,11 @@ xero-tenant-id: <tenantId>
 Accept: application/json
 ```
 
-Then I would confirm the returned invoice matches the expected customer, amount, status, and date.
-
 ## C5. If the invoice API returns `429`, how should the backend handle it?
 
-`429` means too many requests. The backend should treat it as a retryable rate-limit error.
+`429` means too many requests. 
 
-Recommended handling:
+Handling:
 
 - Do not immediately retry in a tight loop.
 - Read Xero rate-limit headers such as remaining minute/day limits.
@@ -114,14 +104,3 @@ Recommended handling:
 - Return a clear temporary error to the caller, for example "Xero rate limit reached, retrying later".
 - Reduce future API calls by using pagination, caching, and `If-Modified-Since`.
 - Avoid duplicate writes by using idempotency keys when creating or updating data.
-
-Xero documents common limits such as concurrent, per-minute, and daily API call limits. A good backend should monitor these headers and slow down before the limit is fully exhausted.
-
-## Common Problems And Hints
-
-- `/connections` does not prove invoice access by itself. It only proves the user authorised at least one tenant.
-- Most Accounting API calls need the `xero-tenant-id` header.
-- Use the tenant ID from `/connections`, not the connection ID.
-- Invoice read access needs the correct accounting transaction scope.
-- Always log the status code, response body, tenant ID, and request ID when debugging.
-- For production syncs, prefer incremental reads using `If-Modified-Since` instead of fetching all invoices every time.
